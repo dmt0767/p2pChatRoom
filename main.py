@@ -6,6 +6,7 @@ import time
 import udp as pu 
 from config import seed
 
+
 class Node:
     seed = seed
     peers = {}
@@ -23,9 +24,9 @@ class Node:
                 print("A new peer is coming")
                 self.peers[action['data']]= addr
                 # print(addr)
-                pu.sendJS(self.udp_socket, addr,{
-                "type":'peers',
-                "data":self.peers
+                pu.sendJS(self.udp_socket, addr, {
+                "type": 'peers',
+                "data": self.peers
                 })         
 
             if action['type'] == 'peers':
@@ -35,7 +36,7 @@ class Node:
                 pu.broadcastJS(self.udp_socket, {
                     "type":"introduce",
                     "data": self.myid
-                },self.peers) 
+                }, self.peers)
 
             if action['type'] == 'introduce':
                 print("Get a new friend.")
@@ -51,12 +52,12 @@ class Node:
                     break;
                     # self.udp_socket.close()
                 value, key = self.peers.pop(action['data'])
-                print( action['data'] + " is left.")          
+                print(action['data'] + " is left.")
             
     def startpeer(self):
         pu.sendJS(self.udp_socket,self.seed,{
-            "type":"newpeer",
-            "data":self.myid
+            "type": "newpeer",
+            "data": self.myid
         })
 
     def send(self):
@@ -64,37 +65,39 @@ class Node:
             msg_input = input("$:")
             if msg_input == "exit":
                 pu.broadcastJS(self.udp_socket, {
-                    "type":"exit",
-                    "data":self.myid
-                },self.peers)
-                break     
+                    "type": "exit",
+                    "data": self.myid
+                }, self.peers)
+                break
             if msg_input == "friends":
                 print(self.peers) 
-                continue      
+                continue
             l = msg_input.split()
             if l[-1] in self.peers.keys():
                 toA = self.peers[l[-1]]
                 s = ' '.join(l[:-1]) 
-                pu.sendJS(self.udp_socket, toA,{
-                    "type":"input",
-                    "data":s
+                pu.sendJS(self.udp_socket, toA, {
+                    "type": "input",
+                    "data": s
                 })      
-            else :
+            else:
                 pu.broadcastJS(self.udp_socket, {
-                    "type":"input",
-                    "data":msg_input
-                },self.peers)
+                    "type": "input",
+                    "data": msg_input
+                }, self.peers)
                 continue 
+
+
 def main():
     port = int(sys.argv[1]) #从命令行获取端口号
-    fromA = ("127.0.0.1",port)
+    fromA = ("10.17.0.203", port)
     udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    udp_socket.bind((fromA[0],fromA[1]))
+    udp_socket.bind((fromA[0], fromA[1]))
     peer = Node()
     peer.myid = sys.argv[2]
     peer.udp_socket = udp_socket
     # print(fromA, peer.myid)
-    peer.startpeer()
+    peer.startpeer() # Отправляет сообщение о новом подключенном пире
     t1 = threading.Thread(target=peer.rece, args=())
     t2 = threading.Thread(target=peer.send, args=())
 
