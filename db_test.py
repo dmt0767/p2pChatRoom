@@ -20,7 +20,7 @@ def send_messages():
     headers = [i[0] for i in db_cursor.description]
     messages = list()
     for message in raw_messages:
-        message.
+        messages.append(create_message_dict(message, headers))
     db.close()
     return '1'
 
