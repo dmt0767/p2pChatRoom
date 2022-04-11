@@ -79,7 +79,7 @@ class Node:
                 pu.sendJS(self.udp_socket, toA, {
                     "type": "input",
                     "data": s
-                })      
+                })
             else:
                 pu.broadcastJS(self.udp_socket, {
                     "type": "input",
