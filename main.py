@@ -3,9 +3,19 @@ import socket
 import sys 
 import json 
 import time
-import udp as pu 
+import udp 
 from config import seed
+import netifaces
 
+#определяем локальный ip адрес
+interfaces = netifaces.interfaces()
+for i in interfaces:
+    if i == 'lo':
+        continue
+    iface = netifaces.ifaddresses(i).get(netifaces.AF_INET)
+    if iface != None:
+        for j in iface:
+            my_ip=j['addr']
 
 class Node:
     seed = seed
@@ -15,7 +25,7 @@ class Node:
 
     def rece(self):
         while 1:
-            data, addr = pu.recembase(self.udp_socket)
+            data, addr = udp.recembase(self.udp_socket)
             action = json.loads(data)
             # print(action["type"])
         #     self.dispatch(action, addr)
@@ -24,7 +34,7 @@ class Node:
                 print("A new peer is coming")
                 self.peers[action['data']]= addr
                 # print(addr)
-                pu.sendJS(self.udp_socket, addr, {
+                udp.sendJS(self.udp_socket, addr, {
                 "type": 'peers',
                 "data": self.peers
                 })         
@@ -33,7 +43,7 @@ class Node:
                 print("Received a bunch of peers")
                 self.peers.update(action['data'])
                 # introduce youself. 
-                pu.broadcastJS(self.udp_socket, {
+                udp.broadcastJS(self.udp_socket, {
                     "type":"introduce",
                     "data": self.myid
                 }, self.peers)
@@ -49,39 +59,39 @@ class Node:
                 if(self.myid == action['data']):
                 #cannot be closed too fast.  
                     time.sleep(0.5) 
-                    break;
+                    break
                     # self.udp_socket.close()
                 value, key = self.peers.pop(action['data'])
                 print(action['data'] + " is left.")
             
     def startpeer(self):
-        pu.sendJS(self.udp_socket,self.seed,{
+        udp.sendJS(self.udp_socket,self.seed,{
             "type": "newpeer",
             "data": self.myid
         })
 
     def send(self):
-        while 1: 
+        while True:   #было 1 вместо true
             msg_input = input("$:")
-            if msg_input == "exit":
-                pu.broadcastJS(self.udp_socket, {
+            if msg_input == "/exit":
+                udp.broadcastJS(self.udp_socket, {
                     "type": "exit",
                     "data": self.myid
                 }, self.peers)
                 break
-            if msg_input == "friends":
+            if msg_input == "/friends":
                 print(self.peers) 
                 continue
             l = msg_input.split()
             if l[-1] in self.peers.keys():
                 toA = self.peers[l[-1]]
                 s = ' '.join(l[:-1]) 
-                pu.sendJS(self.udp_socket, toA, {
+                udp.sendJS(self.udp_socket, toA, {
                     "type": "input",
                     "data": s
                 })
             else:
-                pu.broadcastJS(self.udp_socket, {
+                udp.broadcastJS(self.udp_socket, {
                     "type": "input",
                     "data": msg_input
                 }, self.peers)
@@ -89,8 +99,8 @@ class Node:
 
 
 def main():
-    port = int(sys.argv[1]) #从命令行获取端口号
-    fromA = ("10.17.0.203", port)
+    port = int(sys.argv[1]) #Получить номер порта из командной строки
+    fromA = (my_ip, port) ###
     udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     udp_socket.bind((fromA[0], fromA[1]))
     peer = Node()

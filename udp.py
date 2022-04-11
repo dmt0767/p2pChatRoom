@@ -27,12 +27,12 @@ def broadcastJS(udp_socket,message, peers):
         sendJS(udp_socket,p,message)
 
 def rece(udp_socket):
-    while 1:
-        data,addr = recembase(udp_socket)
+    while True:
+        data, addr = recembase(udp_socket)
         print(data)
 
 def send(udp_socket):
-    while 1:
+    while True:
         msg = input("please input message and port:")
         l = msg.split()
         port = int(l[-1])
@@ -42,7 +42,7 @@ def send(udp_socket):
 
 def main():
     
-    port = int(sys.argv[1]) #从命令行获取端口号
+    port = int(sys.argv[1]) #Получить номер порта из командной строки
     fromA = ("127.0.0.1",port)
     udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     udp_socket.bind((fromA[0],fromA[1]))
