@@ -4,22 +4,27 @@ import sys
 import json
 # send string , to address.
 
+
+def jsonify_mes_buf(buffer: list):
+    ans = dict()
+    for i, message in enumerate(buffer):
+        ans[i] = message
+    return json.dumps(ans)
+
+
 def sendmbase(udp_socket, toA, message ):
     udp_socket.sendto(message.encode(),(toA[0],toA[1]))
-#     print(message, toA)
 
 
 # receive message, 
 # return message, and addr. 
 def recembase(udp_socket):
     data, addr = udp_socket.recvfrom(1024)
-#     print(addr)
     return data.decode(), addr 
 
 
 def sendJS(udp_socket,toA,message):
-#     print(toA)    
-    sendmbase(udp_socket,toA,json.dumps(message))
+    sendmbase(udp_socket, toA, json.dumps(message))
 
 
 def broadcastms(udp_socket,message, peers):

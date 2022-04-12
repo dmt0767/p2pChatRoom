@@ -5,17 +5,36 @@ import json
 import time
 import udp as pu 
 from config import seed
+from datetime import datetime
+from pydantic import BaseModel
 
+
+class Message(BaseModel):
+    user_from: str
+    user_to: str
+    timestamp: str
+    data_type: str
+    data: str
+
+    def new_message(self, user_from='', user_to='', timestamp='', data_type='', data=''):
+        self.user_from = user_from
+        self.user_to = user_to
+        self.timestamp = timestamp
+        self.data_type = data_type
+        self.data = data
 
 class Node:
     seed = seed
     peers = {}
     myid = ""
     udp_socket = {}
-    api_socket = {}
+    api_receive_socket = {}
+    api_translate_socket = {}
+
+    buffer = list()
 
     def rece(self):
-        buffer = list()
+
         while 1:
             data, addr = pu.recembase(self.udp_socket)
             action = json.loads(data)
@@ -24,7 +43,7 @@ class Node:
         # def dispatch(self, action,addr):
             if action['type'] == 'newpeer':
                 print("A new peer is coming")
-                self.peers[action['data']]= addr
+                self.peers[action['data']] = addr
                 # print(addr)
                 pu.sendJS(self.udp_socket, addr, {
                 "type": 'peers',
@@ -36,7 +55,7 @@ class Node:
                 self.peers.update(action['data'])
                 # introduce youself. 
                 pu.broadcastJS(self.udp_socket, {
-                    "type":"introduce",
+                    "type": "introduce",
                     "data": self.myid
                 }, self.peers)
 
@@ -45,7 +64,12 @@ class Node:
                 self.peers[action['data']] = addr
 
             if action['type'] == 'input':
-                buffer.append(action['data'])
+                message = Message(user_from=addr[0],
+                                  user_to='None',
+                                  timestamp=str(datetime.now()),
+                                  data_type=action['type'],
+                                  data=action['data'])
+                self.buffer.append(message.dict())
                 print(action['data'])  
 
             if action['type'] == 'exit':
@@ -66,8 +90,9 @@ class Node:
     def send(self):
         while 1:
             #msg_input = input("$:")
-            data, addr = pu.recembase(self.api_socket)
-            msg_input = data
+            data, addr = pu.recembase(self.api_receive_socket)
+            msg_input = json.loads(data)['data']
+            print(type(data))
             print('I have just recieved {} from API-server'.format(data))
             if msg_input == "exit":
                 pu.broadcastJS(self.udp_socket, {
@@ -91,30 +116,43 @@ class Node:
                     "type": "input",
                     "data": msg_input
                 }, self.peers)
-                continue 
+                continue
+
+    def api_server_handler(self):
+        while True:
+            data, addr = pu.recembase(self.api_translate_socket)
+            pu.sendmbase(self.api_translate_socket, addr, pu.jsonify_mes_buf(self.buffer))
+            #pu.sendJS(self.api_translate_socket, addr, {1: 23, 2: 46})
+            print(self.buffer)
+            print(pu.jsonify_mes_buf(self.buffer))
 
 
 def main():
     port = int(sys.argv[1])
     fromA = ("10.17.0.203", port)
+
     udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     udp_socket.bind((fromA[0], fromA[1]))
-
-    sock_api = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)  # Сокет для приёма сообщений от API сервера
-    sock_api.bind(('127.0.0.1', 55555))
+    sock_receive_api = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)  # Сокет для приёма сообщений от API сервера
+    sock_receive_api.bind(('127.0.0.1', 55555))
+    sock_translate_api = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)  # Сокет для приёма сообщений от API сервера
+    sock_translate_api.bind(('127.0.0.1', 44444))
 
     peer = Node()
     peer.myid = sys.argv[2]
     peer.udp_socket = udp_socket
-    peer.api_socket = sock_api
+    peer.api_receive_socket = sock_receive_api
+    peer.api_translate_socket = sock_translate_api
     # print(fromA, peer.myid)
     peer.startpeer()  # Отправляет сообщение о новом подключенном пире
 
     t1 = threading.Thread(target=peer.rece, args=())
     t2 = threading.Thread(target=peer.send, args=())
+    t3 = threading.Thread(target=peer.api_server_handler, args=())
 
     t1.start()
     t2.start()
+    t3.start()
 
 
 if __name__ == '__main__':
