@@ -29,4 +29,4 @@ def send_messages():
 
 
 if __name__ == "__main__":
-    app.run(host='10.17.0.203', port=12345)
+    app.run(host='10.17.0.203', port=80)

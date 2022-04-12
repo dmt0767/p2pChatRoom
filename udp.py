@@ -3,6 +3,7 @@ import threading
 import sys
 import json
 # send string , to address.
+from config import seed, port_seed, ip_seed
 
 
 def extract_ip(manual=False):
@@ -57,8 +58,10 @@ def broadcastms(udp_socket,message, peers):
 
 
 def broadcastJS(udp_socket,message, peers):
-    for p in peers.values():
-        sendJS(udp_socket,p,message)
+    for user_id, ip in zip(peers.keys(), peers.values()):
+        if user_id == 'Server':
+            ip = (ip_seed, port_seed)
+            sendJS(udp_socket, ip, message)
 
 
 def rece(udp_socket):
