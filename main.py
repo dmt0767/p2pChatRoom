@@ -12,6 +12,7 @@ class Node:
     peers = {}
     myid = ""
     udp_socket = {}
+    api_socket = {}
 
     def rece(self):
         buffer = list()
@@ -41,7 +42,7 @@ class Node:
 
             if action['type'] == 'introduce':
                 print("Get a new friend.")
-                self.peers[action['data']]= addr   
+                self.peers[action['data']] = addr
 
             if action['type'] == 'input':
                 buffer.append(action['data'])
@@ -63,8 +64,11 @@ class Node:
         })
 
     def send(self):
-        while 1: 
-            msg_input = input("$:")
+        while 1:
+            #msg_input = input("$:")
+            data, addr = pu.recembase(self.api_socket)
+            msg_input = data
+            print('I have just recieved {} from API-server'.format(data))
             if msg_input == "exit":
                 pu.broadcastJS(self.udp_socket, {
                     "type": "exit",
@@ -91,15 +95,21 @@ class Node:
 
 
 def main():
-    port = int(sys.argv[1]) #从命令行获取端口号
+    port = int(sys.argv[1])
     fromA = ("10.17.0.203", port)
     udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     udp_socket.bind((fromA[0], fromA[1]))
+
+    sock_api = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)  # Сокет для приёма сообщений от API сервера
+    sock_api.bind(('127.0.0.1', 55555))
+
     peer = Node()
     peer.myid = sys.argv[2]
     peer.udp_socket = udp_socket
+    peer.api_socket = sock_api
     # print(fromA, peer.myid)
     peer.startpeer()  # Отправляет сообщение о новом подключенном пире
+
     t1 = threading.Thread(target=peer.rece, args=())
     t2 = threading.Thread(target=peer.send, args=())
 

@@ -2,10 +2,12 @@ import socket
 import threading
 import sys
 import json
-# send string , to address.  
+# send string , to address.
+
 def sendmbase(udp_socket, toA, message ):
     udp_socket.sendto(message.encode(),(toA[0],toA[1]))
 #     print(message, toA)
+
 
 # receive message, 
 # return message, and addr. 
@@ -14,22 +16,27 @@ def recembase(udp_socket):
 #     print(addr)
     return data.decode(), addr 
 
+
 def sendJS(udp_socket,toA,message):
 #     print(toA)    
     sendmbase(udp_socket,toA,json.dumps(message))
+
 
 def broadcastms(udp_socket,message, peers):
     for p in peers.values():
         sendmbase(udp_socket,p,message)
 
+
 def broadcastJS(udp_socket,message, peers):
     for p in peers.values():
         sendJS(udp_socket,p,message)
+
 
 def rece(udp_socket):
     while 1:
         data,addr = recembase(udp_socket)
         print(data)
+
 
 def send(udp_socket):
     while 1:
@@ -39,6 +46,7 @@ def send(udp_socket):
         s = ' '.join(l[:-1])
         toA = ('127.0.0.1', port)
         sendmbase(udp_socket, toA, s)
+
 
 def main():
     
