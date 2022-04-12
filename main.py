@@ -14,6 +14,7 @@ class Node:
     udp_socket = {}
 
     def rece(self):
+        buffer = list()
         while 1:
             data, addr = pu.recembase(self.udp_socket)
             action = json.loads(data)
@@ -43,6 +44,7 @@ class Node:
                 self.peers[action['data']]= addr   
 
             if action['type'] == 'input':
+                buffer.append(action['data'])
                 print(action['data'])  
 
             if action['type'] == 'exit':
@@ -70,7 +72,7 @@ class Node:
                 }, self.peers)
                 break
             if msg_input == "friends":
-                print(self.peers) 
+                print(self.peers)
                 continue
             l = msg_input.split()
             if l[-1] in self.peers.keys():
@@ -97,7 +99,7 @@ def main():
     peer.myid = sys.argv[2]
     peer.udp_socket = udp_socket
     # print(fromA, peer.myid)
-    peer.startpeer() # Отправляет сообщение о новом подключенном пире
+    peer.startpeer()  # Отправляет сообщение о новом подключенном пире
     t1 = threading.Thread(target=peer.rece, args=())
     t2 = threading.Thread(target=peer.send, args=())
 
