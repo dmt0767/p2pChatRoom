@@ -51,7 +51,7 @@ def send(udp_socket):
 def main():
     
     port = int(sys.argv[1]) #从命令行获取端口号
-    fromA = ("127.0.0.1",port)
+    fromA = ("127.0.0.1", port)
     udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     udp_socket.bind((fromA[0],fromA[1]))
     t1 = threading.Thread(target=rece, args=(udp_socket,))

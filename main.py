@@ -58,7 +58,7 @@ class Node:
                 print(action['data'] + " is left.")
             
     def startpeer(self):
-        pu.sendJS(self.udp_socket,self.seed,{
+        pu.sendJS(self.udp_socket, self.seed, {
             "type": "newpeer",
             "data": self.myid
         })
