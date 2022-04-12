@@ -1,17 +1,15 @@
 import threading
 import socket
-import sys 
-import json 
+import sys
+import json
 import time
 import random
 
 import udp
-from config import seed
+from config import seed, port_seed, ip_seed
 from datetime import datetime
 from pydantic import BaseModel
 
-my_ip = None
-my_port = None
 
 class Message(BaseModel):
     user_from: str
@@ -44,15 +42,15 @@ class Node:
             data, addr = udp.recembase(self.udp_socket)
             action = json.loads(data)
             # print(action["type"])
-        #     self.dispatch(action, addr)
-        # def dispatch(self, action,addr):
+            #     self.dispatch(action, addr)
+            # def dispatch(self, action,addr):
             if action['type'] == 'newpeer':
                 print("A new peer is coming")
                 self.peers[action['data']] = addr
                 # print(addr)
                 udp.sendJS(self.udp_socket, addr, {
-                "type": 'peers',
-                "data": self.peers
+                    "type": 'peers',
+                    "data": self.peers
                 })
 
             if action['type'] == 'peers':
@@ -75,17 +73,17 @@ class Node:
                                   data_type=action['type'],
                                   data=action['data'])
                 self.buffer.append(message.dict())
-                print(action['data'])  
+                print(action['data'])
 
             if action['type'] == 'exit':
-                if(self.myid == action['data']):
-                #cannot be closed too fast.  
-                    time.sleep(0.5) 
+                if (self.myid == action['data']):
+                    # cannot be closed too fast.
+                    time.sleep(0.5)
                     break;
                     # self.udp_socket.close()
                 value, key = self.peers.pop(action['data'])
                 print(action['data'] + " is left.")
-            
+
     def startpeer(self):
         udp.sendJS(self.udp_socket, self.seed, {
             "type": "newpeer",
@@ -94,9 +92,9 @@ class Node:
 
     def send(self):
         while True:
-            #msg_input = input("$:")
-            data, addr = udp.recembase(self.api_receive_socket)
-            msg_input = json.loads(data)['data']
+            msg_input = input("$:")
+            #data, addr = udp.recembase(self.api_receive_socket)
+            #msg_input = json.loads(data)['data']
             if msg_input == "/exit":
                 udp.broadcastJS(self.udp_socket, {
                     "type": "exit",
@@ -109,7 +107,7 @@ class Node:
             l = msg_input.split()
             if l[-1] in self.peers.keys():
                 toA = self.peers[l[-1]]
-                s = ' '.join(l[:-1]) 
+                s = ' '.join(l[:-1])
                 udp.sendJS(self.udp_socket, toA, {
                     "type": "input",
                     "data": s
@@ -131,22 +129,18 @@ class Node:
 
 
 def main():
-    global my_ip, my_port
-    # определяем локальный ip адрес:
-    my_ip = udp.extract_ip()
-    my_port = random.randint(10000, 60000)  # Присвоение порта
     udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    udp_socket.bind((my_ip, my_port))
+    udp_socket.bind((ip_seed, port_seed))
 
-    print(f'Адрес вашего сервера: {my_ip}:{my_port}')
+    print(f'Адрес вашего сервера: {ip_seed}:{port_seed}')
 
     sock_receive_api = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)  # Сокет для приёма сообщений от API сервера
-    sock_receive_api.bind(('127.0.0.1', 55555))
+    sock_receive_api.bind(('127.0.0.1', 55556))
     sock_translate_api = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)  # Сокет для приёма сообщений от API сервера
-    sock_translate_api.bind(('127.0.0.1', 44444))
+    sock_translate_api.bind(('127.0.0.1', 44445))
 
     peer = Node()
-    peer.myid = 'Dima'
+    peer.myid = 'Server'
     peer.udp_socket = udp_socket
     peer.api_receive_socket = sock_receive_api
     peer.api_translate_socket = sock_translate_api
@@ -163,7 +157,7 @@ def main():
 
 
 if __name__ == '__main__':
-    main()           
+    main()
 
 # usage:
 # python main.py 8891 id1

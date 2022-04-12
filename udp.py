@@ -5,6 +5,30 @@ import json
 # send string , to address.
 
 
+def extract_ip(manual=False):
+    st = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    manual_ip = "10.17.0.203"
+    if manual:
+        return manual_ip
+    else:
+        try:
+            st.connect(('10.255.255.255', 1))
+            IP = st.getsockname()[0]
+        except Exception:
+            IP = manual_ip
+        finally:
+            st.close()
+    return IP
+
+
+def get_id(ip, d: dict):
+    print(d)
+    for key in d:
+        if d[key][0] == ip:
+            return key
+    return 'None'
+
+
 def jsonify_mes_buf(buffer: list):
     ans = dict()
     for i, message in enumerate(buffer):
