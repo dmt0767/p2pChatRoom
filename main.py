@@ -6,12 +6,14 @@ import time
 import random
 
 import udp
-from config import seed
+from config import seed, ip_seed, port_seed
 from datetime import datetime
 from pydantic import BaseModel
 
 my_ip = None
 my_port = None
+udp_hole_time = 10
+
 
 class Message(BaseModel):
     user_from: str
@@ -35,6 +37,7 @@ class Node:
     udp_socket = {}
     api_receive_socket = {}
     api_translate_socket = {}
+    keep_alive_socket = {}
 
     buffer = list()
 
@@ -43,6 +46,7 @@ class Node:
         while 1:
             data, addr = udp.recembase(self.udp_socket)
             action = json.loads(data)
+            print(action)
             # print(action["type"])
         #     self.dispatch(action, addr)
         # def dispatch(self, action,addr):
@@ -81,7 +85,7 @@ class Node:
                 if(self.myid == action['data']):
                 #cannot be closed too fast.  
                     time.sleep(0.5) 
-                    break;
+                    break
                     # self.udp_socket.close()
                 value, key = self.peers.pop(action['data'])
                 print(action['data'] + " is left.")
@@ -129,6 +133,16 @@ class Node:
             print(self.buffer)
             print(udp.jsonify_mes_buf(self.buffer))
 
+    def keep_alive(self):
+        time.sleep(udp_hole_time)
+        addr = (ip_seed, port_seed)
+        alive_message = {'type': 'keep_alive',
+                         'data': 'I`m alive'}
+
+        while True:
+            time.sleep(udp_hole_time)
+            udp.sendJS(self.udp_socket, addr, alive_message)
+
 
 def main():
     global my_ip, my_port
@@ -144,22 +158,26 @@ def main():
     sock_receive_api.bind(('127.0.0.1', 55555))
     sock_translate_api = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)  # Сокет для приёма сообщений от API сервера
     sock_translate_api.bind(('127.0.0.1', 44444))
+    sock_keep_alive = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
     peer = Node()
     peer.myid = 'Dima'
     peer.udp_socket = udp_socket
     peer.api_receive_socket = sock_receive_api
     peer.api_translate_socket = sock_translate_api
+    #peer.keep_alive_socket = sock_keep_alive
     # print(fromA, peer.myid)
     peer.startpeer()  # Отправляет сообщение о новом подключенном пире
 
     t1 = threading.Thread(target=peer.rece, args=())
     t2 = threading.Thread(target=peer.send, args=())
     t3 = threading.Thread(target=peer.api_server_handler, args=())
+    t4 = threading.Thread(target=peer.keep_alive, args=())
 
     t1.start()
     t2.start()
     t3.start()
+    t4.start()
 
 
 if __name__ == '__main__':

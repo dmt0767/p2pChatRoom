@@ -4,6 +4,7 @@ import sys
 import json
 # send string , to address.
 from config import seed, port_seed, ip_seed
+from time import sleep
 
 
 def extract_ip(manual=False):
@@ -31,10 +32,13 @@ def get_id(ip, d: dict):
 
 
 def jsonify_mes_buf(buffer: list):
+    '''
     ans = dict()
     for i, message in enumerate(buffer):
         ans[i] = message
-    return json.dumps(ans)
+    '''
+
+    return json.dumps({'messages': buffer})
 
 
 def sendmbase(udp_socket, toA, message ):
