@@ -172,7 +172,7 @@ def main():
     #sock_keep_alive = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
     peer = Node()
-    peer.myid = 'Dima'
+    peer.myid = 'Dima2'
     peer.udp_socket = udp_socket
     peer.api_receive_socket = sock_receive_api
     peer.api_translate_socket = sock_translate_api
