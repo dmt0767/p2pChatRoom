@@ -52,13 +52,15 @@ def recembase(udp_socket):
     return data.decode(), addr 
 
 
-def sendJS(udp_socket,toA,message):
+def sendJS(udp_socket, toA, message):
+    toA = toA[0]  # Берём IP. p[1] -- это public key
     sendmbase(udp_socket, toA, json.dumps(message))
 
 
-def broadcastms(udp_socket,message, peers):
+def broadcastms(udp_socket, message, peers):
     for p in peers.values():
-        sendmbase(udp_socket,p,message)
+        p = p[0]  # Берём IP. p[1] -- это public key
+        sendmbase(udp_socket, p, message)
 
 
 def broadcastJS(udp_socket,message, peers):

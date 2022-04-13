@@ -10,6 +10,18 @@ from config import seed, ip_seed, port_seed
 from datetime import datetime
 from pydantic import BaseModel
 
+from Crypto.PublicKey import RSA
+code = 'army trooper'
+key = RSA.generate(2048)
+
+encrypted_key = key.exportKey(
+    passphrase=code,
+    pkcs=8,
+    protection="scryptAndAES128-CBC"
+)  # Приватный ключ
+
+public_key = key.publickey().exportKey()  # Публичный ключ
+
 my_ip = None
 my_port = None
 udp_hole_time = 10
@@ -52,7 +64,7 @@ class Node:
         # def dispatch(self, action,addr):
             if action['type'] == 'newpeer':
                 print("A new peer is coming")
-                self.peers[action['data']] = addr
+                self.peers[action['data']] = (addr, action['publik_key'])
                 # print(addr)
                 udp.sendJS(self.udp_socket, addr, {
                 "type": 'peers',
@@ -70,7 +82,7 @@ class Node:
 
             if action['type'] == 'introduce':
                 print("Get a new friend.")
-                self.peers[action['data']] = addr
+                self.peers[action['data']] = (addr, action['publik_key'])
 
             if action['type'] == 'input':
                 message = Message(user_from=udp.get_id(addr[0], self.peers),
@@ -93,7 +105,8 @@ class Node:
     def startpeer(self):
         udp.sendJS(self.udp_socket, self.seed, {
             "type": "newpeer",
-            "data": self.myid
+            "data": self.myid,
+            "public_key": public_key
         })
 
     def send(self):
