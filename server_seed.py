@@ -75,6 +75,7 @@ class Node:
                                   timestamp=str(datetime.now()),
                                   data_type=action['type'],
                                   data=action['data'])
+                print(message.user_from)
                 self.buffer.append(message.dict())
                 # print(addr[0])
                 print(udp.get_id(addr[0], self.peers), '>:' ,action['data'])
