@@ -44,6 +44,8 @@ class Node:
             # print(action["type"])
             #     self.dispatch(action, addr)
             # def dispatch(self, action,addr):
+            if action['type'] == 'keep_alive':
+                print(f'{addr} is alive!')
             if action['type'] == 'newpeer':
                 print("A new peer is coming")
                 self.peers[action['data']] = addr
@@ -56,7 +58,7 @@ class Node:
             if action['type'] == 'peers':
                 print("Received a bunch of peers")
                 self.peers.update(action['data'])
-                # introduce youself. 
+                # introduce youself.
                 udp.broadcastJS(self.udp_socket, {
                     "type": "introduce",
                     "data": self.myid
