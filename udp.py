@@ -65,7 +65,7 @@ def broadcastJS(udp_socket,message, peers):
     for user_id, ip in zip(peers.keys(), peers.values()):
         if user_id == 'Server':
             ip = (ip_seed, port_seed)
-            sendJS(udp_socket, ip, message)
+        sendJS(udp_socket, ip, message)
 
 
 def rece(udp_socket):
