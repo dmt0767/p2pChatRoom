@@ -29,7 +29,7 @@ def get_id(ip, d: dict):
         print(d[key][0] == ip)
         if d[key][0] == ip:
             return key
-        elif d[key][0] == '10.129.0.16':
+        elif ip == '10.129.0.16':
             return 'Yandex Cloud'
     return 'None'
 
