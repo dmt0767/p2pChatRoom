@@ -4,7 +4,6 @@ import sys
 import json
 # send string , to address.
 from config import seed, port_seed, ip_seed
-from time import sleep
 
 
 def extract_ip(manual=False):
@@ -41,19 +40,18 @@ def jsonify_mes_buf(buffer: list):
     return json.dumps({'messages': buffer})
 
 
-def sendmbase(udp_socket, toA, message ):
-    udp_socket.sendto(message.encode(),(toA[0],toA[1]))
+def sendmbase(udp_socket, toA, message):
+    udp_socket.sendto(message.encode(), (toA[0], toA[1]))
 
 
-# receive message, 
-# return message, and addr. 
+# receive message,
+# return message, and addr.
 def recembase(udp_socket):
     data, addr = udp_socket.recvfrom(1024)
-    return data.decode(), addr 
+    return data.decode(), addr
 
 
 def sendJS(udp_socket, toA, message):
-    toA = toA[0]  # Берём IP. p[1] -- это public key
     sendmbase(udp_socket, toA, json.dumps(message))
 
 
@@ -65,9 +63,11 @@ def broadcastms(udp_socket, message, peers):
 
 def broadcastJS(udp_socket,message, peers):
     for user_id, ip in zip(peers.keys(), peers.values()):
-        if user_id == 'Server':
+        if user_id == 'Server':  # Сервер присылает свой локальный IP, будем использовать глобальный
             ip = (ip_seed, port_seed)
-            sendJS(udp_socket, ip, message)
+        else:
+            ip = ip[0]  # Берём IP. p[1] -- это public key
+        sendJS(udp_socket, ip, message)
 
 
 def rece(udp_socket):
@@ -87,7 +87,7 @@ def send(udp_socket):
 
 
 def main():
-    
+
     port = int(sys.argv[1]) #从命令行获取端口号
     fromA = ("127.0.0.1", port)
     udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -96,13 +96,7 @@ def main():
     t2 = threading.Thread(target=send, args=(udp_socket,))
     t1.start()
     t2.start()
- 
- 
-if __name__ == '__main__':
-    main()        
 
-# usage:
-# python p2pUdp.py 10001 
-# python p2pUdp.py 10002
-# hello 10001
-# world 10002 
+
+if __name__ == '__main__':
+    main()

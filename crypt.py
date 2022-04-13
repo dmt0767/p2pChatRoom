@@ -8,6 +8,9 @@ encrypted_key = key.exportKey(
     protection="scryptAndAES128-CBC"
 )
 
+#encrypted_key = encrypted_key.decode()
+#encrypted_key = encrypted_key.encode()
+
 with open('my_rsa_key.pem', 'wb') as f:
     f.write(encrypted_key)
 

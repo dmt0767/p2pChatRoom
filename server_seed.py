@@ -53,14 +53,13 @@ class Node:
         while 1:
             data, addr = udp.recembase(self.udp_socket)
             action = json.loads(data)
-            # print(action["type"])
-            #     self.dispatch(action, addr)
-            # def dispatch(self, action,addr):
+            print(action)
+
             if action['type'] == 'keep_alive':
                 print(f'{addr} is alive!')
             if action['type'] == 'newpeer':
                 print("A new peer is coming")
-                self.peers[action['data']] = (addr, action['publik_key'])
+                self.peers[action['data']] = (addr, action['public_key'])
                 # print(addr)
                 udp.sendJS(self.udp_socket, addr, {
                     "type": 'peers',
@@ -73,12 +72,13 @@ class Node:
                 # introduce youself.
                 udp.broadcastJS(self.udp_socket, {
                     "type": "introduce",
-                    "data": self.myid
+                    "data": self.myid,
+                    "public_key": public_key.decode()
                 }, self.peers)
 
             if action['type'] == 'introduce':
                 print("Get a new friend.")
-                self.peers[action['data']] = (addr, action['publik_key'])
+                self.peers[action['data']] = (addr, action['public_key'])
 
             if action['type'] == 'input':
                 message = Message(user_from=udp.get_id(addr[0], self.peers),
@@ -102,7 +102,7 @@ class Node:
         udp.sendJS(self.udp_socket, self.seed, {
             "type": "newpeer",
             "data": self.myid,
-            "public_key": public_key
+            "public_key": public_key.decode()
         })
 
     def send(self):
