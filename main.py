@@ -20,8 +20,8 @@ encrypted_key = key.exportKey(
     protection="scryptAndAES128-CBC"
 )  # Приватный ключ
 
-public_key = key.publickey().exportKey()  # Публичный ключ
-
+#public_key = key.publickey().exportKey()  # Публичный ключ
+public_key = b''
 my_ip = None
 my_port = None
 udp_hole_time = 10
