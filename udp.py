@@ -26,7 +26,7 @@ def extract_ip(manual=False):
 def get_id(ip, d: dict):
     print(d)
     for key in d:
-        print(d[key][0])
+        print(d[key][0], ip)
         if d[key][0] == ip:
             return key
         elif d[key][0] == '10.129.0.16':
