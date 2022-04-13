@@ -46,7 +46,7 @@ class Node:
         while 1:
             data, addr = udp.recembase(self.udp_socket)
             action = json.loads(data)
-            print(action)
+            #print(action)
             # print(action["type"])
         #     self.dispatch(action, addr)
         # def dispatch(self, action,addr):
@@ -73,14 +73,14 @@ class Node:
                 self.peers[action['data']] = addr
 
             if action['type'] == 'input':
-                print(addr[0], self.peers)
+                #print(addr[0], self.peers)
                 message = Message(user_from=udp.get_id(addr[0], self.peers),
                                   user_to='All',
                                   timestamp=str(datetime.now()),
                                   data_type=action['type'],
                                   data=action['data'])
                 self.buffer.append(message.dict())
-                print(action['data'])
+                print(udp.get_id(addr[0], self.peers), '>:', action['data'])
 
             if action['type'] == 'exit':
                 if(self.myid == action['data']):
@@ -131,8 +131,8 @@ class Node:
             data, addr = udp.recembase(self.api_translate_socket)
             udp.sendmbase(self.api_translate_socket, addr, udp.jsonify_mes_buf(self.buffer))
             self.buffer.clear()
-            print(self.buffer)
-            print(udp.jsonify_mes_buf(self.buffer))
+            #print(self.buffer)
+            #print(udp.jsonify_mes_buf(self.buffer))
 
     def keep_alive(self):
         time.sleep(udp_hole_time)
