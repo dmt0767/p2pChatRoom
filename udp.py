@@ -44,6 +44,7 @@ def jsonify_mes_buf(buffer: list):
 
 
 def sendmbase(udp_socket, toA, message ):
+    #print(toA, message)
     udp_socket.sendto(message.encode(),(toA[0],toA[1]))
 
 
@@ -65,7 +66,7 @@ def broadcastms(udp_socket,message, peers):
 
 def broadcastJS(udp_socket,message, peers):
     for user_id, ip in zip(peers.keys(), peers.values()):
-        if user_id == 'Server':
+        if user_id == 'Yandex_Cloud':
             ip = (ip_seed, port_seed)
         sendJS(udp_socket, ip, message)
 

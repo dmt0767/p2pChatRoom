@@ -75,7 +75,7 @@ class Node:
                                   data_type=action['type'],
                                   data=action['data'])
                 self.buffer.append(message.dict())
-                #print(action['data'])
+                print(action['data'])
 
             if action['type'] == 'exit':
                 if (self.myid == action['data']):
