@@ -45,7 +45,7 @@ class Node:
             #     self.dispatch(action, addr)
             # def dispatch(self, action,addr):
             if action['type'] == 'keep_alive':
-                print(f'{addr} keeps p2p Hole Punching')
+                print(f'{addr} keeps UDP Hole Punching')
             if action['type'] == 'newpeer':
                 print("New peer connection")
                 self.peers[action['data']] = addr
@@ -69,13 +69,14 @@ class Node:
                 self.peers[action['data']] = addr
 
             if action['type'] == 'input':
+                print(udp.get_id(addr[0], self.peers))
                 message = Message(user_from=udp.get_id(addr[0], self.peers),
                                   user_to='All',
                                   timestamp=str(datetime.now()),
                                   data_type=action['type'],
                                   data=action['data'])
                 self.buffer.append(message.dict())
-                print(addr[0])
+                # print(addr[0])
                 print(udp.get_id(addr[0], self.peers), '>:' ,action['data'])
 
             if action['type'] == 'exit':
