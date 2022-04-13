@@ -73,6 +73,7 @@ class Node:
                 self.peers[action['data']] = addr
 
             if action['type'] == 'input':
+                print(addr[0], self.peers)
                 message = Message(user_from=udp.get_id(addr[0], self.peers),
                                   user_to='All',
                                   timestamp=str(datetime.now()),
