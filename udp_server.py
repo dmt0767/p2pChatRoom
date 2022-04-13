@@ -62,7 +62,7 @@ def broadcastms(udp_socket, message, peers):
         sendmbase(udp_socket, p, message)
 
 
-def broadcastJS(udp_socket,message, peers):
+def broadcastJS(udp_socket, message, peers):
     for p in peers.values():
         sendJS(udp_socket, p, message)
 
