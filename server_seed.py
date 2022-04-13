@@ -45,9 +45,9 @@ class Node:
             #     self.dispatch(action, addr)
             # def dispatch(self, action,addr):
             if action['type'] == 'keep_alive':
-                print(f'{addr} is alive!')
+                print(f'{addr} keeps p2p Hole Punching')
             if action['type'] == 'newpeer':
-                print("A new peer is coming")
+                print("New peer connection")
                 self.peers[action['data']] = addr
                 # print(addr)
                 udp.sendJS(self.udp_socket, addr, {
@@ -56,7 +56,7 @@ class Node:
                 })
 
             if action['type'] == 'peers':
-                print("Received a bunch of peers")
+                print("Get peer info")
                 self.peers.update(action['data'])
                 # introduce youself.
                 udp.broadcastJS(self.udp_socket, {
@@ -65,7 +65,7 @@ class Node:
                 }, self.peers)
 
             if action['type'] == 'introduce':
-                print("Get a new friend.")
+                print("New peer has connected")
                 self.peers[action['data']] = addr
 
             if action['type'] == 'input':
@@ -75,7 +75,7 @@ class Node:
                                   data_type=action['type'],
                                   data=action['data'])
                 self.buffer.append(message.dict())
-                print(action['data'])
+                #print(action['data'])
 
             if action['type'] == 'exit':
                 if (self.myid == action['data']):
@@ -126,8 +126,8 @@ class Node:
             data, addr = udp.recembase(self.api_translate_socket)
             udp.sendmbase(self.api_translate_socket, addr, udp.jsonify_mes_buf(self.buffer))
             self.buffer.clear()
-            print(self.buffer)
-            print(udp.jsonify_mes_buf(self.buffer))
+            #print(self.buffer)
+            #print(udp.jsonify_mes_buf(self.buffer))
 
 
 def main():
@@ -142,7 +142,7 @@ def main():
     sock_translate_api.bind(('127.0.0.1', 44445))
 
     peer = Node()
-    peer.myid = 'Server'
+    peer.myid = 'Yandex_Cloud'
     peer.udp_socket = udp_socket
     peer.api_receive_socket = sock_receive_api
     peer.api_translate_socket = sock_translate_api

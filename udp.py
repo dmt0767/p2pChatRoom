@@ -28,6 +28,8 @@ def get_id(ip, d: dict):
     for key in d:
         if d[key][0] == ip:
             return key
+        elif d[key][0] == '10.129.0.16':
+            return 'Yandex Cloud'
     return 'None'
 
 
@@ -70,7 +72,7 @@ def broadcastJS(udp_socket,message, peers):
 
 def rece(udp_socket):
     while 1:
-        data,addr = recembase(udp_socket)
+        data, addr = recembase(udp_socket)
         print(data)
 
 
@@ -86,7 +88,7 @@ def send(udp_socket):
 
 def main():
     
-    port = int(sys.argv[1]) #从命令行获取端口号
+    port = int(sys.argv[1])
     fromA = ("127.0.0.1", port)
     udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     udp_socket.bind((fromA[0],fromA[1]))
