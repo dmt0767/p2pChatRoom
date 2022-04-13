@@ -76,7 +76,7 @@ class Node:
                                   data=action['data'])
                 self.buffer.append(message.dict())
                 print(addr[0])
-                print(udp.get_id(addr[0], self.peers), '>:' ,action['data'], sep='')
+                print(udp.get_id(addr[0], self.peers), '>:' ,action['data'])
 
             if action['type'] == 'exit':
                 if (self.myid == action['data']):
