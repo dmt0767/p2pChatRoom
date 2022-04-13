@@ -1,12 +1,12 @@
 import threading
 import socket
-import sys 
-import json 
+import sys
+import json
 import time
 import random
 
 import udp
-from config import seed, ip_seed, port_seed
+from config import seed, port_seed, ip_seed
 from datetime import datetime
 from pydantic import BaseModel
 
@@ -49,7 +49,6 @@ class Node:
     udp_socket = {}
     api_receive_socket = {}
     api_translate_socket = {}
-    keep_alive_socket = {}
 
     buffer = list()
 
@@ -74,7 +73,7 @@ class Node:
             if action['type'] == 'peers':
                 print("Received a bunch of peers")
                 self.peers.update(action['data'])
-                # introduce youself. 
+                # introduce youself.
                 udp.broadcastJS(self.udp_socket, {
                     "type": "introduce",
                     "data": self.myid
@@ -91,17 +90,17 @@ class Node:
                                   data_type=action['type'],
                                   data=action['data'])
                 self.buffer.append(message.dict())
-                print(action['data'])  
+                print(action['data'])
 
             if action['type'] == 'exit':
                 if(self.myid == action['data']):
-                #cannot be closed too fast.  
-                    time.sleep(0.5) 
+                    # cannot be closed too fast.
+                    time.sleep(0.5)
                     break
                     # self.udp_socket.close()
                 value, key = self.peers.pop(action['data'])
                 print(action['data'] + " is left.")
-            
+
     def startpeer(self):
         udp.sendJS(self.udp_socket, self.seed, {
             "type": "newpeer",
@@ -126,7 +125,7 @@ class Node:
             l = msg_input.split()
             if l[-1] in self.peers.keys():
                 toA = self.peers[l[-1]]
-                s = ' '.join(l[:-1]) 
+                s = ' '.join(l[:-1])
                 udp.sendJS(self.udp_socket, toA, {
                     "type": "input",
                     "data": s
@@ -171,14 +170,13 @@ def main():
     sock_receive_api.bind(('127.0.0.1', 55555))
     sock_translate_api = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)  # Сокет для приёма сообщений от API сервера
     sock_translate_api.bind(('127.0.0.1', 44444))
-    sock_keep_alive = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    #sock_keep_alive = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
     peer = Node()
     peer.myid = 'Dima'
     peer.udp_socket = udp_socket
     peer.api_receive_socket = sock_receive_api
     peer.api_translate_socket = sock_translate_api
-    #peer.keep_alive_socket = sock_keep_alive
     # print(fromA, peer.myid)
     peer.startpeer()  # Отправляет сообщение о новом подключенном пире
 
@@ -194,9 +192,4 @@ def main():
 
 
 if __name__ == '__main__':
-    main()           
-
-# usage:
-# python main.py 8891 id1
-# python main.py 8892 id2
-# python main.py 8893 id3
+    main()

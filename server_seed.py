@@ -10,6 +10,18 @@ from config import seed, port_seed, ip_seed
 from datetime import datetime
 from pydantic import BaseModel
 
+from Crypto.PublicKey import RSA
+code = 'army trooper'
+key = RSA.generate(2048)
+
+encrypted_key = key.exportKey(
+    passphrase=code,
+    pkcs=8,
+    protection="scryptAndAES128-CBC"
+)  # Приватный ключ
+
+public_key = key.publickey().exportKey()  # Публичный ключ
+
 
 class Message(BaseModel):
     user_from: str
@@ -44,9 +56,11 @@ class Node:
             # print(action["type"])
             #     self.dispatch(action, addr)
             # def dispatch(self, action,addr):
+            if action['type'] == 'keep_alive':
+                print(f'{addr} is alive!')
             if action['type'] == 'newpeer':
                 print("A new peer is coming")
-                self.peers[action['data']] = addr
+                self.peers[action['data']] = (addr, action['publik_key'])
                 # print(addr)
                 udp.sendJS(self.udp_socket, addr, {
                     "type": 'peers',
@@ -56,7 +70,7 @@ class Node:
             if action['type'] == 'peers':
                 print("Received a bunch of peers")
                 self.peers.update(action['data'])
-                # introduce youself. 
+                # introduce youself.
                 udp.broadcastJS(self.udp_socket, {
                     "type": "introduce",
                     "data": self.myid
@@ -64,7 +78,7 @@ class Node:
 
             if action['type'] == 'introduce':
                 print("Get a new friend.")
-                self.peers[action['data']] = addr
+                self.peers[action['data']] = (addr, action['publik_key'])
 
             if action['type'] == 'input':
                 message = Message(user_from=udp.get_id(addr[0], self.peers),
@@ -76,10 +90,10 @@ class Node:
                 print(action['data'])
 
             if action['type'] == 'exit':
-                if (self.myid == action['data']):
+                if(self.myid == action['data']):
                     # cannot be closed too fast.
                     time.sleep(0.5)
-                    break;
+                    break
                     # self.udp_socket.close()
                 value, key = self.peers.pop(action['data'])
                 print(action['data'] + " is left.")
@@ -87,7 +101,8 @@ class Node:
     def startpeer(self):
         udp.sendJS(self.udp_socket, self.seed, {
             "type": "newpeer",
-            "data": self.myid
+            "data": self.myid,
+            "public_key": public_key
         })
 
     def send(self):
@@ -158,8 +173,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
-# usage:
-# python main.py 8891 id1
-# python main.py 8892 id2
-# python main.py 8893 id3
